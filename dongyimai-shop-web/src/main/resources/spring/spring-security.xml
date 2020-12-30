@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans:beans xmlns="http://www.springframework.org/schema/security"
+             xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+             xmlns:beans="http://www.springframework.org/schema/beans"
+             xmlns:dubbo="http://code.alibabatech.com/schema/dubbo"
+             xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd http://www.springframework.org/schema/security http://www.springframework.org/schema/security/spring-security.xsd http://code.alibabatech.com/schema/dubbo http://code.alibabatech.com/schema/dubbo/dubbo.xsd">
+    <!--释放不需要拦截的资源-->
+    <http pattern="/favicon.ico" security="none"></http>
+
+
+    <http pattern="/shoplogin.html" security="none"></http>
+    <http pattern="/register.html" security="none"></http>
+    <http pattern="/css/**" security="none"></http>
+    <http pattern="/img/**" security="none"></http>
+    <http pattern="/js/**" security="none"></http>
+    <http pattern="/plugins/**" security="none"></http>
+    <http pattern="/seller/add.do" security="none"></http>
+
+
+
+
+
+    <!--配置springSecurity拦截规则 -->
+    <http use-expressions="false">
+        <!--具有ROLE_ADMIN 角色的用户才可以访问所有的资源-->
+         <intercept-url pattern="/**" access="ROLE_SELLER"></intercept-url>
+         <!--提供一个springSecurity自带登录页面-->
+        <form-login login-page="/shoplogin.html" default-target-url="/admin/index.html" always-use-default-target="true"
+        authentication-failure-url="/shoplogin.html"/>
+        <!--关闭跨站攻击-->
+        <csrf disabled="true"/>
+
+        <!--配置用户退出后要到的页面-->
+        <logout logout-success-url="/shoplogin.html"></logout>
+
+        <headers>
+            <!--框架同源-->
+            <frame-options policy="SAMEORIGIN"/>
+        </headers>
+    </http>
+
+    <!--配置权限认证管理器-->
+    <authentication-manager alias="authenticationManager">
+        <authentication-provider user-service-ref="userDetailsServiceImpl">
+            <!--引入加密算法-->
+               <password-encoder ref="bcryptEncoder"></password-encoder>
+
+
+        </authentication-provider>
+
+
+
+    </authentication-manager>
+
+    <beans:bean id="userDetailsServiceImpl" class="com.offcn.service.UserDetailsServiceImpl">
+          <beans:property name="sellerService" ref="sellerService"></beans:property>
+    </beans:bean>
+
+    <!--dubbo相关的配置-->
+    <dubbo:application name="dongyimai-shop-web"></dubbo:application>
+    <!--配置注册中心的位置-->
+    <dubbo:registry address="zookeeper://192.168.188.128:2181"></dubbo:registry>
+    <!--操作的dubbo注解位置-->
+    <dubbo:reference id="sellerService" interface="com.offcn.sellergoods.service.SellerService"/>
+
+    <beans:bean id="bcryptEncoder" class="org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder"></beans:bean>
+
+</beans:beans>

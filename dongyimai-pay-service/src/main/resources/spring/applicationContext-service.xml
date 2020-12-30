@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:dubbo="http://code.alibabatech.com/schema/dubbo"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd http://code.alibabatech.com/schema/dubbo http://code.alibabatech.com/schema/dubbo/dubbo.xsd http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd">
+    <!--zookeeper 默认服务端口号， 为20880， 如果被占用，就不能再使用，需要手动一个端口-->
+    <dubbo:protocol name="dubbo" port="20900" ></dubbo:protocol>
+    <!--配置应用名-->
+    <dubbo:application name="dongyimai-pay-service"></dubbo:application>
+    <!--配置注册中心的地址-->
+    <dubbo:registry address="zookeeper://192.168.188.128:2181"></dubbo:registry>
+    <!--配置扫描服务的包-->
+    <dubbo:annotation package="com.offcn.pay.service.impl"></dubbo:annotation>
+
+    <!--加载支付配置文件 -->
+    <context:property-placeholder location="classpath*:properties/*.properties"></context:property-placeholder>
+    <!-- 创建AlipayClient：支付应用客户端 -->
+    <bean id="payClient" class="com.alipay.api.DefaultAlipayClient">
+        <constructor-arg name="serverUrl" value="${serverUrl}"/>
+        <constructor-arg name="appId" value="${appId}"/>
+        <constructor-arg name="privateKey" value="${privateKey}"/>
+        <constructor-arg name="format" value="${format}"/>
+        <constructor-arg name="charset" value="${charset}"/>
+        <constructor-arg name="alipayPublicKey" value="${alipayPulicKey}"/>
+        <constructor-arg name="signType" value="${signType}"/>
+    </bean>
+
+</beans>
